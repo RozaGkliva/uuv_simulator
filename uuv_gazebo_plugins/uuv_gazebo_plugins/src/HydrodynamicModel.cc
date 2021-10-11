@@ -18,11 +18,26 @@
 
 namespace gazebo
 {
+
+
+ros::NodeHandle nh_;
+ros::Subscriber sub_force_req = nh_.subscribe("body_forces", 1, &ProcessWrenchStamped);
+Eigen::Vector6d bodyForces;
+
+void ProcessWrenchStamped(const geometry_msgs::WrenchStampedConstPtr wrenchStamped){
+        bodyForces[0] = wrenchStamped->wrench.force.x;
+        bodyForces[1] = wrenchStamped->wrench.force.y;
+        bodyForces[2] = wrenchStamped->wrench.force.z;
+        bodyForces[3] = wrenchStamped->wrench.torque.x;
+        bodyForces[4] = wrenchStamped->wrench.torque.y;
+        bodyForces[5] = wrenchStamped->wrench.torque.z;
+}
 /////////////////////////////////////////////////
 HydrodynamicModel::HydrodynamicModel(sdf::ElementPtr _sdf,
     physics::LinkPtr _link) : BuoyantObject(_link)
 {
   GZ_ASSERT(_link != NULL, "Invalid link pointer");
+
 
   // Initialize filtered acceleration & last velocity
   this->filteredAcc.setZero();
@@ -75,15 +90,9 @@ HydrodynamicModel::HydrodynamicModel(sdf::ElementPtr _sdf,
       double width = sdfModel->Get<double>("width");
       double length = sdfModel->Get<double>("length");
       double height = sdfModel->Get<double>("height");
-  #if GAZEBO_MAJOR_VERSION >= 11
-      ignition::math::AxisAlignedBox boundingBox = ignition::math::AxisAlignedBox(
+      ignition::math::Box boundingBox = ignition::math::Box(
         ignition::math::Vector3d(-width / 2, -length / 2, -height / 2),
         ignition::math::Vector3d(width / 2, length / 2, height / 2));
-  #else
-        ignition::math::Box boundingBox = ignition::math::Box(
-        ignition::math::Vector3d(-width / 2, -length / 2, -height / 2),
-        ignition::math::Vector3d(width / 2, length / 2, height / 2));
-  #endif
       // Setting the the bounding box from the given dimensions
       this->SetBoundingBox(boundingBox);
     }
@@ -108,6 +117,8 @@ HydrodynamicModel::HydrodynamicModel(sdf::ElementPtr _sdf,
 void HydrodynamicModel::ComputeAcc(Eigen::Vector6d _velRel, double _time,
                                   double _alpha)
 {
+
+
   // Compute Fossen's nu-dot numerically. We have to do this for now since
   // Gazebo reports angular accelerations that are off by orders of magnitude.
   double dt = _time - lastTime;
@@ -183,6 +194,15 @@ HydrodynamicModel * HydrodynamicModelFactory::CreateHydrodynamicModel(
     std::cerr << "Cannot create HydrodynamicModel with unknown identifier: "
               << identifier << std::endl;
     return NULL;
+  }
+
+  if (!ros::isInitialized())
+  {
+  int argc = 0;
+  char** argv = NULL;
+  ros::init(argc, argv, "HydrodynamicsModel", ros::init_options::NoSigintHandler |
+                                              ros::init_options::AnonymousName);
+  ros::spin();
   }
 
   return creators_[identifier](_sdf, _link);
@@ -362,6 +382,7 @@ HMFossen::HMFossen(sdf::ElementPtr _sdf,
   this->quadDampCoef = quadDampCoef;
 }
 
+
 /////////////////////////////////////////////////
 void HMFossen::ApplyHydrodynamicForces(
   double _time, const ignition::math::Vector3d &_flowVelWorld)
@@ -418,7 +439,8 @@ void HMFossen::ApplyHydrodynamicForces(
   Eigen::Vector6d cor = -this->Ca * velRel;
 
   // All additional (compared to standard rigid body) Fossen terms combined.
-  Eigen::Vector6d tau = damping + added + cor;
+
+  Eigen::Vector6d tau = damping + added + cor + bodyForces;
 
   GZ_ASSERT(!std::isnan(tau.norm()), "Hydrodynamic forces vector is nan");
 
@@ -750,7 +772,7 @@ HMSphere::HMSphere(sdf::ElementPtr _sdf,
   {
     // Setting the added mass
     this->Ma(i, i) = -sphereMa;
-    // Setting the pressure drag    
+    // Setting the pressure drag
     this->DNonLin(i, i) = Dq;
   }
 }

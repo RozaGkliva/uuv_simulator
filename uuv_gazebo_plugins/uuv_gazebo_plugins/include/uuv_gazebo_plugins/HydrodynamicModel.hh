@@ -26,6 +26,8 @@
 #include <gazebo/physics/Collision.hh>
 #include <gazebo/physics/Shape.hh>
 
+#include <ros/ros.h>
+
 #include <eigen3/Eigen/Core>
 #include <eigen3/Eigen/Geometry>
 
@@ -35,10 +37,14 @@
 
 #include <uuv_gazebo_plugins/Def.hh>
 #include <uuv_gazebo_plugins/BuoyantObject.hh>
+#include <geometry_msgs/WrenchStamped.h>
 
 
 namespace gazebo
 {
+    void ProcessWrenchStamped(const geometry_msgs::WrenchStampedConstPtr data);
+
+
 class HydrodynamicModel : public BuoyantObject
 {
   /// \brief Protected constructor: Use the factory for object creation.
@@ -65,6 +71,7 @@ class HydrodynamicModel : public BuoyantObject
 
   /// \brief Set a scalar parameters
   public: virtual bool SetParam(std::string _tag, double _input) = 0;
+
 
   /// \brief Filter acceleration (fix due to the update structure of Gazebo)
   protected: void ComputeAcc(Eigen::Vector6d _velRel,
@@ -152,6 +159,9 @@ class HydrodynamicModelFactory
 ///       Control", 2011
 class HMFossen : public HydrodynamicModel
 {
+
+  ///
+
   /// \brief Create model of this type with parameter values from sdf.
   public: static HydrodynamicModel* create(sdf::ElementPtr _sdf,
       physics::LinkPtr _link);
