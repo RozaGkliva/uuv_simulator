@@ -50,6 +50,7 @@ catkin_package(
     uuv_thruster_plugin
     uuv_fin_plugin
     uuv_dynamics
+    uuv_flipper_plugin
 )
 
 include_directories(${PROJECT_SOURCE_DIR}/include
@@ -95,6 +96,19 @@ add_dependencies(uuv_fin_plugin
   uuv_gazebo_plugins_msgs
   ${catkin_EXPORTED_TARGETS})
 list(APPEND UUV_GAZEBO_PLUGINS_LIST uuv_fin_plugin)
+
+add_library(uuv_flipper_plugin
+    src/FlipperPlugin.cc
+)
+target_link_libraries(uuv_flipper_plugin
+    uuv_dynamics
+    uuv_gazebo_plugins_msgs
+    ${catkin_LIBRARIES}
+    ${Boost_LIBRARIES})
+add_dependencies(uuv_flipper_plugin
+  uuv_gazebo_plugins_msgs
+  ${catkin_EXPORTED_TARGETS})
+list(APPEND UUV_GAZEBO_PLUGINS_LIST uuv_flipper_plugin)
 
 add_library(uuv_underwater_object_plugin
     src/HydrodynamicModel.cc
