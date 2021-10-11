@@ -206,6 +206,9 @@ void UnderwaterObjectPlugin::Update(const common::UpdateInfo &_info)
     angularAccel = link->GetRelativeAngularAccel().GetLength();
 #endif
 
+ /*   std::cout<<"linearAccel"<<linearAccel<<std::endl;
+    std::cout<<"angularAccel"<<angularAccel<<std::endl;*/
+
     GZ_ASSERT(!std::isnan(linearAccel) && !std::isnan(angularAccel),
       "Linear or angular accelerations are invalid.");
 

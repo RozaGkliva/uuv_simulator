@@ -1,8 +1,13 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.0.2)
 project(uuv_gazebo_ros_plugins)
 
 # Specify C++11 standard
-add_definitions(-std=c++11)
+if(NOT "${CMAKE_VERSION}" VERSION_LESS "3.16")
+    set(CMAKE_CXX_STANDARD 17)
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+else()
+    set(LOCAL_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+endif()
 
 find_package(catkin REQUIRED COMPONENTS
   uuv_gazebo_plugins
@@ -24,6 +29,7 @@ catkin_package(
  INCLUDE_DIRS include
  LIBRARIES
   uuv_fin_ros_plugin
+  uuv_flipper_ros_plugin
   uuv_thruster_ros_plugin
   uuv_underwater_object_ros_plugin
   uuv_joint_state_publisher
@@ -51,6 +57,11 @@ add_library(uuv_fin_ros_plugin src/FinROSPlugin.cc)
 target_link_libraries(uuv_fin_ros_plugin ${catkin_LIBRARIES})
 add_dependencies(uuv_fin_ros_plugin ${catkin_EXPORTED_TARGETS})
 list(APPEND UUV_GAZEBO_ROS_PLUGINS_LIST uuv_fin_ros_plugin)
+
+add_library(uuv_flipper_ros_plugin src/FlipperROSPlugin.cc)
+target_link_libraries(uuv_flipper_ros_plugin ${catkin_LIBRARIES})
+add_dependencies(uuv_flipper_ros_plugin ${catkin_EXPORTED_TARGETS})
+list(APPEND UUV_GAZEBO_ROS_PLUGINS_LIST uuv_flipper_ros_plugin)
 
 add_library(uuv_thruster_ros_plugin src/ThrusterROSPlugin.cc)
 target_link_libraries(uuv_thruster_ros_plugin ${catkin_LIBRARIES})

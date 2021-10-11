@@ -99,6 +99,7 @@ list(APPEND UUV_GAZEBO_PLUGINS_LIST uuv_fin_plugin)
 
 add_library(uuv_flipper_plugin
     src/FlipperPlugin.cc
+    src/LiftDragModel.cc
 )
 target_link_libraries(uuv_flipper_plugin
     uuv_dynamics
