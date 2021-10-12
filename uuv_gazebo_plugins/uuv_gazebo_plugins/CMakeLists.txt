@@ -10,7 +10,9 @@ else()
 endif()
 
 find_package(catkin REQUIRED COMPONENTS
-    gazebo_dev)
+    gazebo_dev
+    geometry_msgs
+    roscpp)
 find_package(Boost REQUIRED COMPONENTS system)
 find_package(Eigen3 REQUIRED)
 find_package(Protobuf REQUIRED)

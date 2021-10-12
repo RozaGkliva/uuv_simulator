@@ -22,6 +22,9 @@
   <depend>gazebo_dev</depend>
   <depend>protobuf-dev</depend>
   <depend>eigen</depend>
+  <depend>roscpp</depend>
+  <depend>geometry_msgs</depend>
+
 
   <test_depend>rosunit</test_depend>
 

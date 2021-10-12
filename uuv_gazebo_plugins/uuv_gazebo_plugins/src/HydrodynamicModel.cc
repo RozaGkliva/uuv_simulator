@@ -21,7 +21,7 @@ namespace gazebo
 
 
 ros::NodeHandle nh_;
-ros::Subscriber sub_force_req = nh_.subscribe("body_forces", 1, &ProcessWrenchStamped);
+ros::Subscriber sub_force_req = nh_.subscribe("/ucat/force_fins", 1, &ProcessWrenchStamped);
 Eigen::Vector6d bodyForces;
 
 void ProcessWrenchStamped(const geometry_msgs::WrenchStampedConstPtr wrenchStamped){
@@ -90,9 +90,15 @@ HydrodynamicModel::HydrodynamicModel(sdf::ElementPtr _sdf,
       double width = sdfModel->Get<double>("width");
       double length = sdfModel->Get<double>("length");
       double height = sdfModel->Get<double>("height");
+  #if GAZEBO_MAJOR_VERSION >= 11
+      ignition::math::AxisAlignedBox boundingBox = ignition::math::AxisAlignedBox(
+        ignition::math::Vector3d(-width / 2, -length / 2, -height / 2),
+        ignition::math::Vector3d(width / 2, length / 2, height / 2));
+  #else
       ignition::math::Box boundingBox = ignition::math::Box(
         ignition::math::Vector3d(-width / 2, -length / 2, -height / 2),
         ignition::math::Vector3d(width / 2, length / 2, height / 2));
+  #endif
       // Setting the the bounding box from the given dimensions
       this->SetBoundingBox(boundingBox);
     }
